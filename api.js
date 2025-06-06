@@ -28,7 +28,7 @@ db.connect(err => {
 
 // GET - Listar todos os pontos (x,y)
 app.get('/points', (req, res) => {
-  db.query('SELECT x, y FROM grafico', (err, results) => {
+  db.query('SELECT x, y FROM points', (err, results) => {
     if (err) return res.status(500).json({ error: err });
     res.json(results);
   });
@@ -47,7 +47,7 @@ app.post('/points',
     }
 
     const { x, y } = req.body;
-    const sql = 'INSERT INTO grafico (x, y) VALUES (?, ?)';
+    const sql = 'INSERT INTO points (x, y) VALUES (?, ?)';
     db.query(sql, [x, y], (err, result) => {
       if (err) return res.status(500).json({ error: err });
       res.status(201).json({ x, y });
@@ -70,7 +70,7 @@ app.put('/points',
     }
 
     const { oldX, oldY, newX, newY } = req.body;
-    const sql = 'UPDATE grafico SET x = ?, y = ? WHERE x = ? AND y = ?';
+    const sql = 'UPDATE points SET x = ?, y = ? WHERE x = ? AND y = ?';
     db.query(sql, [newX, newY, oldX, oldY], (err, result) => {
       if (err) return res.status(500).json({ error: err });
       if (result.affectedRows === 0) return res.status(404).json({ message: 'Ponto não encontrado' });
@@ -91,7 +91,7 @@ app.delete('/points',
       return res.status(400).json({ error: 'x e y são obrigatórios no corpo da requisição' });
     }
 
-    const sql = 'DELETE FROM grafico WHERE x = ? AND y = ?';
+    const sql = 'DELETE FROM points WHERE x = ? AND y = ?';
     db.query(sql, [x, y], (err, result) => {
       if (err) return res.status(500).json({ error: err });
       if (result.affectedRows === 0) return res.status(404).json({ message: 'Ponto não encontrado' });
