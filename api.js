@@ -47,6 +47,7 @@ app.post('/points',
     }
 
     const { x, y } = req.body;
+
     const sql = 'INSERT INTO points (x, y) VALUES (?, ?)';
     db.query(sql, [x, y], (err, result) => {
       if (err) return res.status(500).json({ error: err });
@@ -54,7 +55,6 @@ app.post('/points',
     });
   }
 );
-
 // PUT - Atualizar ponto (x,y) com base no valor antigo de x e y
 app.put('/points',
   [
@@ -99,7 +99,58 @@ app.delete('/points',
     });
   }
 );
+// GET - Listar todos os pontos (x,y)
+app.get('/cows', (req, res) => {
+  db.query('SELECT id, tag_code, cow_weight FROM cows', (err, results) => {
+    if (err) return res.status(500).json({ error: err });
+    res.json(results);
+  });
+});
 
+
+// POST - Adicionar nova vaca
+app.post('/cows',
+  [
+    body('tag_code').isString().withMessage('tag_code deve ser uma string'),
+    body('cow_weight').isFloat().withMessage('cow_weight deve ser um número')
+  ],
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { tag_code, cow_weight } = req.body;
+
+    const sql = 'INSERT INTO cows (tag_code, cow_weight) VALUES (?, ?)';
+    db.query(sql, [tag_code, cow_weight], (err, result) => {
+      if (err) return res.status(500).json({ error: err });
+      res.status(201).json({ tag_code, cow_weight });
+    });
+  }
+);
+app.delete('/cows',
+  [
+    body('id').isInt().withMessage('id deve ser um número inteiro')
+  ],
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { id } = req.body;
+
+    const sql = 'DELETE FROM cows WHERE id = ?';
+    db.query(sql, [id], (err, result) => {
+      if (err) return res.status(500).json({ error: err });
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: 'Vaca não encontrada' });
+      }
+      res.json({ message: 'Vaca deletada com sucesso' });
+    });
+  }
+);
 // Tratamento global de erros
 app.use((err, req, res, next) => {
   console.error(err.stack);
